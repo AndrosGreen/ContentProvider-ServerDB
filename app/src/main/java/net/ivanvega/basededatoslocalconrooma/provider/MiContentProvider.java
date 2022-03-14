@@ -118,13 +118,11 @@ public class MiContentProvider extends ContentProvider {
         User usuario= new User();;
         switch (sURIMatcher.match(uri)){
             case 1:
-
                 usuario.firstName = contentValues.getAsString(UsuarioContrato.COLUMN_FIRSTNAME);
                 usuario.lastName = contentValues.getAsString(UsuarioContrato.COLUMN_LASTNAME);
 
                 long  newid = dao.insert(usuario);
                 return  Uri.withAppendedPath(uri, String.valueOf( newid));
-
         }
 
         return   Uri.withAppendedPath(uri, String.valueOf( -1))  ;
@@ -133,11 +131,17 @@ public class MiContentProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
 
-        switch (sURIMatcher.match(uri)){
-            case 2:
+        AppDatabase db =
+                AppDatabase.getDatabaseInstance(getContext());
 
-                break;
-        }
+        UserDao dao = db.userDao();
+
+        int id = Integer.parseInt(uri.getLastPathSegment());
+        List<User> usuarios = dao.loadAllByIds(new int[]{id});
+
+        if(usuarios.size() == 0) return 0;
+
+        dao.delete(usuarios.get(0));
 
         return 0;
     }
